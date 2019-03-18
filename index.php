@@ -31,7 +31,8 @@
 </form>
 
 <?php
-if (isset($_FILES['fileToUpload']))
+
+if ( isset($_FILES['fileToUpload']) )
     {
     foreach ($_FILES['fileToUpload'] as $value)
         {
@@ -53,6 +54,12 @@ if (isset($_FILES['fileToUpload']))
             echo "Erreur";
         }
     }
+
+if (isset($_GET['delete']))
+{
+    var_dump($value->getPath());
+    unlink($value->getPath());
+}
 ?>
 <!-- Première ligne du tableau -->
 <table class="table table-stripped">
@@ -124,13 +131,13 @@ foreach (new RecursiveDirectoryIterator($dir) as $value)
     }
 
     echo "<td>" . formatSizeUnits($value->getSize()) . "</td>";
-    echo "<td>" . date(" d F Y H:i:s", filemtime($value)) . "</td>";
+    echo "<td>" . date("d F Y H:i:s", filemtime($value)) . "</td>";
+    echo "<td><h3><a href='?delete=1'>Delete Now!</a></h3></td>";
     echo "</tr>";
 }
 ?>
     </tbody>
 </table>
-
     <!-- CONTENT END -->
 
     <!-- Bootstrap JS -->
