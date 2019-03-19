@@ -1,3 +1,6 @@
+<?php
+require('fonctions.php');
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -19,7 +22,6 @@
     <style>
 
     </style>
-
 </head>
 <body>
 
@@ -29,9 +31,14 @@
     <input type="file" name="fileToUpload">
     <input type="submit">
 </form>
+<?php
 
+// Si fileToUpload existe -> il y a un fichier à upload
+// On appelle la fonction d'upload de fichier.
+uploadFile();
+?>
 <!-- Première ligne du tableau -->
-<table class="table table-stripped">
+<table class=" table table-dark table-striped">
     <thead>
         <tr>
             <th>File Name</th>
@@ -43,96 +50,64 @@
 <tbody>
 <!-- isset -> est-ce que la variable est définie. Dans le cas présent on vérifie l'url du dossier courant.-->
 <?php
-
+    // si dir existe -> chemin qui existe 
     if (isset($_GET['dir']))
     {
+        //le chemin est celui affiché dans l'URL
         $dir = $_GET['dir'];
     } 
 
     else 
-    {
+    {   
+        //sinon c'est le chemin par défaut : donc le dossier courant
         $dir = './';
     }
+    // suppression de dossier/fichier
+    // si on clique sur delete , delete vaut quelque chose
+    if (isset($_GET['delete']))
+    {
+        // on récupère le chemin du fichier/dossier à supprimer
+        $filetoDelete = $_GET['file'];
+        //si c'est un dossier
+        if (is_dir($filetoDelete))
+        {   
+            //rmdir -> supprime le dossier
+            rmdir($filetoDelete);
+        }
 
-date_default_timezone_set('Europe/Paris');
-
-function formatSizeUnits($bytes)
-{
-    if ($bytes >= 1073741824)
-    {
-        $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        else 
+        {
+            // sinon, c'est que c'est un fichier 
+            // unlink -> on supprime le fichier
+            unlink($filetoDelete);
+        }
     }
-    elseif ($bytes >= 1048576)
-    {
-        $bytes = number_format($bytes / 1048576, 2) . ' MB';
-    }
-    elseif ($bytes >= 1024)
-    {
-        $bytes = number_format($bytes / 1024, 2) . ' KB';
-    }
-    elseif ($bytes > 1)
-    {
-        $bytes = $bytes . ' bytes';
-    }
-    elseif ($bytes == 1)
-    {
-        $bytes = $bytes . ' byte';
-    }
-    else
-    {
-        $bytes = '0 bytes';
-    }
-
-    return $bytes;
-}   
-
+// pour chaque valeur (fichier) on crée une nouvelle itération de l'objet DirectoryIterator
 foreach (new RecursiveDirectoryIterator($dir) as $value) 
 {
+    // on récupère la méthode fileName() : nom du fichier, getSize() : taille du fichier, que l'on convertie avec la fonction formatSizeUnits et getMTime : la dernière date de modification du fichier
+    $fileName = $value->getFilename();
+    $path = $dir . '/' . $fileName;
+    $sizeUnits = formatSizeUnits($value->getSize());
+    $time = date("d F Y H:i:s", $value->getMTime());
+
     echo "<tr>";
+
     if ($value ->isDir())
     {
-        echo "<td><a href='?dir=" .  $dir . "/" . $value->getFilename() ."'>". $value->getFilename() ."</a></td>";
+        echo "<td><a href='?dir=" . $path . "'>" . $fileName ."</a></td>";
     }
     
     if ($value ->isFile())
     {
-        echo "<td><a href='" .  $dir . "/" . $value->getFilename() ."'>". $value->getFilename() ."</a></td>";
+        echo "<td><a href='?" . $path . "'>" . $fileName ."</a></td>";
     }
 
-    echo "<td>" . formatSizeUnits($value->getSize()) . "</td>";
-    echo "<td>" . date("d F Y H:i:s", filemtime($value)) . "</td>";
-    echo "<td><h3><a href='?delete=1'>Delete Now!</a></h3></td>";
+    echo "<td>" . $sizeUnits . "</td>";
+    echo "<td>" . $time . "</td>";
+    echo "<td><h3><a href='?delete=1&file=" . $path . "'>Delete Now!</a></h3></td>";
     echo "</tr>";
 }
-    
-if ( isset($_FILES['fileToUpload']) )
-{
-    foreach ($_FILES['fileToUpload'] as $value)
-    {
-        echo $value.'<br>';
-    }
-
-    // ne pas oublier de créer le repertoire 
-    $target_dir = './';  // devra être en mode 775 sous linux ( serveur )
-    $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
-    
-    if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $target_file)) 
-    {
-        echo "Le fichier est valide, et a été téléchargé avec succès.<br>"; 
-        echo " le fichier à une taille de "  . $_FILES['fileToUpload']['size'];
-    } 
-    
-    else 
-    {
-        echo "Erreur";
-    }
-}
-
-if (isset($_GET['delete']))
-{
-    unlink($value);
-}
-var_dump($value->getPath());
 ?>
     </tbody>
 </table>
