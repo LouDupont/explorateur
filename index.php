@@ -30,37 +30,6 @@
     <input type="submit">
 </form>
 
-<?php
-
-if ( isset($_FILES['fileToUpload']) )
-    {
-    foreach ($_FILES['fileToUpload'] as $value)
-        {
-            echo $value.'<br>';
-        }
-
-        // ne pas oublier de créer le repertoire 
-        $target_dir = './';  // devra être en mode 775 sous linux ( serveur )
-        $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
-        
-        if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $target_file)) 
-        {
-            echo "Le fichier est valide, et a été téléchargé avec succès.<br>"; 
-            echo " le fichier à une taille de "  . $_FILES['fileToUpload']['size'];
-        } 
-        
-        else 
-        {
-            echo "Erreur";
-        }
-    }
-
-if (isset($_GET['delete']))
-{
-    var_dump($value->getPath());
-    unlink($value->getPath());
-}
-?>
 <!-- Première ligne du tableau -->
 <table class="table table-stripped">
     <thead>
@@ -135,6 +104,35 @@ foreach (new RecursiveDirectoryIterator($dir) as $value)
     echo "<td><h3><a href='?delete=1'>Delete Now!</a></h3></td>";
     echo "</tr>";
 }
+    
+if ( isset($_FILES['fileToUpload']) )
+{
+    foreach ($_FILES['fileToUpload'] as $value)
+    {
+        echo $value.'<br>';
+    }
+
+    // ne pas oublier de créer le repertoire 
+    $target_dir = './';  // devra être en mode 775 sous linux ( serveur )
+    $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+    
+    if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $target_file)) 
+    {
+        echo "Le fichier est valide, et a été téléchargé avec succès.<br>"; 
+        echo " le fichier à une taille de "  . $_FILES['fileToUpload']['size'];
+    } 
+    
+    else 
+    {
+        echo "Erreur";
+    }
+}
+
+if (isset($_GET['delete']))
+{
+    unlink($value);
+}
+var_dump($value->getPath());
 ?>
     </tbody>
 </table>
